@@ -1,11 +1,12 @@
 import { useState, ReactNode, useCallback } from "react";
-import { Confirm, ConfirmProperties } from "../components/Confirm/confirm";
+import { Confirm, MuiConfirmProps } from "../components/Confirm/confirm";
 import { MuiAlert, MuiAlertProps } from "../components/Alert/alert";
-import { Notification } from "../components/Notificaiton/notification";
+import { MuiNotificationProps, Notification } from "../components/Notificaiton/notification";
 import { v4 as uuidv4 } from "uuid";
 import { omit } from "lodash";
 import { AlertContext } from "./context";
 import { Box, Snackbar } from "@mui/material";
+import { HORIZONTAL, VERTICAL } from "../constants/position";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getNodeText = (node: any): string => {
@@ -18,32 +19,33 @@ const getNodeText = (node: any): string => {
 const getWordCount = (message: string | ReactNode): number =>
   getNodeText(message).trim().split(/\s+/).length;
 
-export interface AlertContent extends Omit<MuiAlertProps, "autoHide"> {
+export interface AlertContent extends MuiAlertProps {
   timeout?: number;
-  stackAlerts?: boolean
+  stackAlerts?: boolean;
 }
 export interface AlertStack extends AlertContent {
   id: string;
 }
-export interface NotificationContent {
-  message: string;
-}
-export interface NotificationProps extends NotificationContent {
-  timeout?: number;
-}
-export interface NotificationStack extends NotificationContent {
+
+export interface NotificationStack extends MuiNotificationProps {
   id: string;
 }
 
-export interface AlertProps {
-  vertical?: 'bottom' | 'top',
-  horizontal?: 'center' | 'left' | 'right',
+export interface AlertGlobalProps {
+  vertical?: VERTICAL,
+  horizontal?: HORIZONTAL
   stackAlerts?: boolean
 }
 
-export const AlertProvider = ({ children, alertProps }: { children: ReactNode, alertProps?: AlertProps }) => {
+export interface NotificationGlobalProps {
+  vertical?: VERTICAL,
+  horizontal?: HORIZONTAL
+}
+
+
+export const AlertProvider = ({ children, alertGlobalProps, notificationGlobalProps }: { children: ReactNode, alertGlobalProps?: AlertGlobalProps, notificationGlobalProps?: NotificationGlobalProps }) => {
   const [alertContent, setAlertContent] = useState<AlertStack[]>([]);
-  const [confirmation, setConfirmation] = useState<ConfirmProperties | null>(
+  const [confirmation, setConfirmation] = useState<MuiConfirmProps | null>(
     null
   );
   const [notificationContent, setNotificationContent] = useState<
@@ -57,15 +59,15 @@ export const AlertProvider = ({ children, alertProps }: { children: ReactNode, a
         time = (wordCount > 4 ? wordCount : 4) * 1000 + inout * 2;
       }
       const id = uuidv4();
-      setAlertContent((prev) => [...((stackAlerts || (stackAlerts === undefined && alertProps?.stackAlerts)) ? prev : []), { ...rest, message, id, timeout: time, inout }]);
+      setAlertContent((prev) => [...((stackAlerts || (stackAlerts === undefined && alertGlobalProps?.stackAlerts)) ? prev : []), { ...rest, message, id, timeout: time, inout }]);
       setTimeout(() => {
         setAlertContent((stack) => stack.filter((item) => item.id !== id));
       }, time);
     },
-    [alertProps?.stackAlerts]
+    [alertGlobalProps?.stackAlerts]
   );
   const notification = useCallback(
-    ({ timeout = 3000, ...rest }: NotificationProps) => {
+    ({ timeout = 3000, ...rest }: MuiNotificationProps) => {
       const id = uuidv4();
       setNotificationContent(() => [{ ...rest, id }]);
       setTimeout(() => {
@@ -76,26 +78,31 @@ export const AlertProvider = ({ children, alertProps }: { children: ReactNode, a
     },
     []
   );
-  const confirm = useCallback((item: ConfirmProperties) => {
+  const confirm = useCallback((item: MuiConfirmProps) => {
     setConfirmation(item);
   }, []);
+
+  const handleOnClose = (alert: AlertStack) => {
+    setAlertContent((stack) => stack.filter((item) => item.id !== alert.id));
+    alert?.onClose?.();
+  }
 
   return (
     <AlertContext.Provider value={{ confirm, alert, notification }}>
       {children}{" "}
       {alertContent?.length > 0
         ? 
-          <Snackbar open anchorOrigin={{ vertical: alertProps?.vertical ?? 'top', horizontal: alertProps?.horizontal ?? 'left'}}>
+          <Snackbar open anchorOrigin={{ vertical: alertGlobalProps?.vertical ?? 'top', horizontal: alertGlobalProps?.horizontal ?? 'left'}}>
             <Box>
               {alertContent.map((alert) => (
-                <MuiAlert key={alert.id} {...alert} />
+                <MuiAlert key={alert.id} {...alert} onClick={() => handleOnClose(alert)}/>
               ))}
             </Box>
           </Snackbar>
         : ""}{" "}
       {notificationContent &&
         notificationContent.map((notification) => (
-          <Notification key={notification.id} {...notification} />
+          <Notification key={notification.id} {...notification} globalProps={notificationGlobalProps}/>
         ))}{" "}
       {confirmation && (
         <Confirm
@@ -104,13 +111,12 @@ export const AlertProvider = ({ children, alertProps }: { children: ReactNode, a
               confirmation?.onClose();
             }
             setConfirmation(null);
-          }}
+          } }
           onSuccess={() => {
-            confirmation.onSuccess();
+            confirmation?.onSuccess?.();
             setConfirmation(null);
-          }}
-          {...omit(confirmation, ["onClose", "onSuccess"])}
-        />
+          } }
+          {...omit(confirmation, ["onClose", "onSuccess"])}        />
       )}{" "}
     </AlertContext.Provider>
   );

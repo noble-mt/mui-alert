@@ -1,6 +1,1 @@
-export enum SEVERITY  {
-    ERROR = "error",
-    INFO = "info",
-    SUCCESS = "success",
-    WARNING = "warning"
-}
+export type SEVERITY = 'error' | 'info' | 'success' | 'warning';

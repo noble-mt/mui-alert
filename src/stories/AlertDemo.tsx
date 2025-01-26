@@ -4,27 +4,40 @@ import { AlertContext } from '../context.tsx/context';
 import { AlertProvider } from '../context.tsx/alertContext';
 import { useContext, useState } from 'react';
 import { SEVERITY } from '../constants/severity';
+import { VARIANT } from '../constants/variant';
+import { HORIZONTAL, VERTICAL } from '../constants/position';
 
 
 export const AlertDemo = () => {
+    const [horizontal, setHorizontal] = useState<HORIZONTAL>('right');
+    const [vertical, setVertical] = useState<VERTICAL>('top');
+    
+    const handlePostionChange = (position: string) => {
+        const [vertical, horizontal] = position.split(' ');
+        setVertical(vertical as never);
+        setHorizontal(horizontal as never);
+    }
     return (
         <Box display="flex" width="100hw" height="100vh" alignItems="center" justifyContent="center">
-            <AlertProvider alertProps={{ stackAlerts: true }}>
-                <AlertTest />
+            <AlertProvider alertGlobalProps={{ stackAlerts: true, horizontal: horizontal, vertical: vertical }}>
+                <AlertTest horizontal={horizontal} vertical={vertical} handlePositionChange={handlePostionChange} />
             </AlertProvider>
         </Box>
     );
 }
 
-const AlertTest = () => {
+const AlertTest = ({ horizontal, vertical, handlePositionChange }: { horizontal: HORIZONTAL, vertical: VERTICAL, handlePositionChange: (position: string) => void }) => {
     const { alert } = useContext(AlertContext);
     const [count, setCount] = useState<number>(0);
-    const [severity, setSeverity] = useState<SEVERITY>(SEVERITY.SUCCESS)
+    const [severity, setSeverity] = useState<SEVERITY>('success');
+    const [variant, setVariant] = useState<VARIANT >('standard');
+    
     const show = () => {
         setCount(prev => prev + 1)
         alert({
             message: "Hello there! You are welcome" + count,
-            severity: severity
+            severity: severity,
+            variant: variant
         });
     }
     return (
@@ -42,12 +55,63 @@ const AlertTest = () => {
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 onChange={(_e, value: any) => setSeverity(value)}
                             >
-                                <FormControlLabel value={SEVERITY.ERROR} control={<Radio />} label={SEVERITY.ERROR} />
-                                <FormControlLabel value={SEVERITY.SUCCESS} control={<Radio />} label={SEVERITY.SUCCESS} />
-                                <FormControlLabel value={SEVERITY.INFO} control={<Radio />} label={SEVERITY.INFO} />
-                                <FormControlLabel value={SEVERITY.WARNING} control={<Radio />} label={SEVERITY.WARNING} />
+                                <FormControlLabel value={'error'} control={<Radio />} label={'error'} />
+                                <FormControlLabel value={'success'} control={<Radio />} label={'success'} />
+                                <FormControlLabel value={'info'} control={<Radio />} label={'info'} />
+                                <FormControlLabel value={'warning'} control={<Radio />} label={'warning'} />
                             </RadioGroup>
-                            </FormControl>
+                        </FormControl>
+                    </Box>
+                    <Box>
+                        <FormControl>
+                            <FormLabel id="demo-controlled-radio-buttons-group">Variant</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                name="controlled-radio-buttons-group"
+                                value={`${vertical} ${horizontal}`}
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                onChange={(_e, value: any) => handlePositionChange(value)}
+                            >
+                                <FormControlLabel value={'top left'} control={<Radio />} label={'Top Left'} />
+                                <FormControlLabel value={'top center'} control={<Radio />} label={'Top Center'} />
+                                <FormControlLabel value={'top right'} control={<Radio />} label={'Top Right'} />
+                                <FormControlLabel value={'bottom left'} control={<Radio />} label={'Bottom Left'} />
+                                <FormControlLabel value={'bottom center'} control={<Radio />} label={'Bottom Center'} />
+                                <FormControlLabel value={'bottom right'} control={<Radio />} label={'Bottom Right'} />
+                            </RadioGroup>
+                        </FormControl>
+                    </Box>
+                    <Box>
+                        <FormControl>
+                            <FormLabel id="demo-controlled-radio-buttons-group">Position</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                name="controlled-radio-buttons-group"
+                                value={variant}
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                onChange={(_e, value: any) => setVariant(value)}
+                            >
+                                <FormControlLabel value={'standard'} control={<Radio />} label={'standard'} />
+                                <FormControlLabel value={'filled'} control={<Radio />} label={'filled'} />
+                                <FormControlLabel value={'outlined'} control={<Radio />} label={'outlined'} />
+                            </RadioGroup>
+                        </FormControl>
+                    </Box>
+                    <Box>
+                        <FormControl>
+                            <FormLabel id="demo-controlled-radio-buttons-group">Color</FormLabel>
+                            <RadioGroup
+                                aria-labelledby="demo-controlled-radio-buttons-group"
+                                name="controlled-radio-buttons-group"
+                                value={variant}
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                onChange={(_e, value: any) => setVariant(value)}
+                            >
+                                <FormControlLabel value={'standard'} control={<Radio />} label={'standard'} />
+                                <FormControlLabel value={'filled'} control={<Radio />} label={'filled'} />
+                                <FormControlLabel value={'outlined'} control={<Radio />} label={'outlined'} />
+                            </RadioGroup>
+                        </FormControl>
                     </Box>
                 </Box>
             </Box>

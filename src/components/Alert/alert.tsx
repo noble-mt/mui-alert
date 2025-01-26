@@ -1,26 +1,24 @@
-import { Button } from "@mui/material"
 import Box from "@mui/material/Box"
-import Snackbar, { SnackbarProps } from "@mui/material/Snackbar"
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 import Alert, { AlertProps } from '@mui/material/Alert';
 import { SEVERITY } from "../../constants/severity";
+import { VARIANT } from "../../constants/variant";
 
 
 
 // import Snackbar from "@mui/material/Snackbar";
-export interface MuiAlertProps extends Omit<AlertProps, 'anchorOrigin'> {
+export interface MuiAlertProps extends Omit<AlertProps, 'onClose'> {
     message: ReactNode | string
     inout?: number,
     severity?: SEVERITY,
-    variant?: 	'filled' | 'outlined' | 'standard'
+    variant?: VARIANT,
+    onClose?: () => void,
 }
 
-export const MuiAlert = ({ message, severity = SEVERITY.SUCCESS, variant = 'standard', ...rest }: MuiAlertProps) => {
-    const [open, setOpen] = useState<boolean>(false);
-    console.log('HErE')
+export const MuiAlert = ({ message, severity = 'success', onClose, variant = 'standard', ...rest }: MuiAlertProps) => {
     return (
         <Box my="8px">
-            <Alert severity={severity} variant={variant} {...rest} >{message}</Alert>
+            <Alert severity={severity} variant={variant} {...rest} onClose={onClose}>{message} </Alert>
         </Box>
     );
 }
