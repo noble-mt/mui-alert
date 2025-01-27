@@ -64,7 +64,7 @@ const AlertTest = ({ horizontal, vertical, handlePositionChange }: { horizontal:
                     </Box>
                     <Box>
                         <FormControl>
-                            <FormLabel id="demo-controlled-radio-buttons-group">Variant</FormLabel>
+                            <FormLabel id="demo-controlled-radio-buttons-group">Position</FormLabel>
                             <RadioGroup
                                 aria-labelledby="demo-controlled-radio-buttons-group"
                                 name="controlled-radio-buttons-group"
@@ -83,23 +83,7 @@ const AlertTest = ({ horizontal, vertical, handlePositionChange }: { horizontal:
                     </Box>
                     <Box>
                         <FormControl>
-                            <FormLabel id="demo-controlled-radio-buttons-group">Position</FormLabel>
-                            <RadioGroup
-                                aria-labelledby="demo-controlled-radio-buttons-group"
-                                name="controlled-radio-buttons-group"
-                                value={variant}
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                onChange={(_e, value: any) => setVariant(value)}
-                            >
-                                <FormControlLabel value={'standard'} control={<Radio />} label={'standard'} />
-                                <FormControlLabel value={'filled'} control={<Radio />} label={'filled'} />
-                                <FormControlLabel value={'outlined'} control={<Radio />} label={'outlined'} />
-                            </RadioGroup>
-                        </FormControl>
-                    </Box>
-                    <Box>
-                        <FormControl>
-                            <FormLabel id="demo-controlled-radio-buttons-group">Color</FormLabel>
+                            <FormLabel id="demo-controlled-radio-buttons-group">Variant</FormLabel>
                             <RadioGroup
                                 aria-labelledby="demo-controlled-radio-buttons-group"
                                 name="controlled-radio-buttons-group"

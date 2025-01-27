@@ -27,25 +27,30 @@ export interface AlertStack extends AlertContent {
   id: string;
 }
 
-export interface NotificationStack extends MuiNotificationProps {
+
+export type NotificationContent = Omit<MuiNotificationProps, 'globalProps'>
+export interface NotificationStack extends NotificationContent {
   id: string;
 }
+
+
+export type ConfirmContent = Omit<MuiConfirmProps, 'globalProps'>
 
 export interface AlertGlobalProps {
   vertical?: VERTICAL,
   horizontal?: HORIZONTAL
   stackAlerts?: boolean
 }
-
 export interface NotificationGlobalProps {
   vertical?: VERTICAL,
   horizontal?: HORIZONTAL
 }
+export type GlobalConfirmProps = Pick<MuiConfirmProps, 'cancelButtonProps' | 'successButtonProps' | 'componentProps' | 'styledDialogComponent' | 'customFooter' | 'hideTopCloseButton' | 'draggable'| 'position' | 'hideButtonProps'>
 
-
-export const AlertProvider = ({ children, alertGlobalProps, notificationGlobalProps }: { children: ReactNode, alertGlobalProps?: AlertGlobalProps, notificationGlobalProps?: NotificationGlobalProps }) => {
+export const AlertProvider = ({ children, alertGlobalProps, notificationGlobalProps, confirmGlobalProps }
+  : { children: ReactNode, alertGlobalProps?: AlertGlobalProps, notificationGlobalProps?: NotificationGlobalProps, confirmGlobalProps?: GlobalConfirmProps }) => {
   const [alertContent, setAlertContent] = useState<AlertStack[]>([]);
-  const [confirmation, setConfirmation] = useState<MuiConfirmProps | null>(
+  const [confirmation, setConfirmation] = useState<ConfirmContent | null>(
     null
   );
   const [notificationContent, setNotificationContent] = useState<
@@ -67,7 +72,7 @@ export const AlertProvider = ({ children, alertGlobalProps, notificationGlobalPr
     [alertGlobalProps?.stackAlerts]
   );
   const notification = useCallback(
-    ({ timeout = 3000, ...rest }: MuiNotificationProps) => {
+    ({ timeout = 3000, ...rest }: NotificationContent) => {
       const id = uuidv4();
       setNotificationContent(() => [{ ...rest, id }]);
       setTimeout(() => {
@@ -116,7 +121,9 @@ export const AlertProvider = ({ children, alertGlobalProps, notificationGlobalPr
             confirmation?.onSuccess?.();
             setConfirmation(null);
           } }
-          {...omit(confirmation, ["onClose", "onSuccess"])}        />
+          {...omit(confirmation, ["onClose", "onSuccess"])}
+          globalProps={confirmGlobalProps}
+        />
       )}{" "}
     </AlertContext.Provider>
   );
